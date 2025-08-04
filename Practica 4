@@ -1,0 +1,7 @@
+# Copia un archivo dentro de una máquina Windows remota usando Ansible
+ansible 192.168.1.100 -m win_copy -a "src=C:\\Users\\kemny\\JAVIER.txt dest=C:\\Users\\kemny\\Documents\\JAVIER.txt remote_src=true"
+
+# Reinicia un grupo de hosts Linux definidos en el inventario de Ansible
+ansible linux -i /etc/ansible/hosts -m reboot -become
+
+
