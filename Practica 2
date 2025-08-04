@@ -1,0 +1,33 @@
+# Añadir clave GPG de HashiCorp y guardarla
+wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+
+# Añadir repositorio de HashiCorp para Ubuntu
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+
+# Actualizar repositorios e instalar Terraform
+sudo apt update && sudo apt install terraform
+
+# Generar clave SSH RSA de 4096 bits para Terraform
+ssh-keygen -t rsa -b 4096 -C "terraform_key"
+
+# Mostrar la clave pública para agregar en DigitalOcean
+cat ~/.ssh/id_rsa.pub
+
+# Editar archivos de configuración Terraform
+sudo nano main.tf
+sudo nano terraform.tfvars
+
+# Inicializar proyecto Terraform
+terraform init
+
+# Crear plan para verificar cambios
+terraform plan
+
+# Aplicar configuración y crear recursos
+terraform apply
+
+# Ver la IP pública asignada a la máquina virtual
+terraform show | grep ipv4_address
+
+# Acceder a la máquina remota por SSH
+ssh root@161.35.1.210
