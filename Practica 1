@@ -1,0 +1,14 @@
+# 2. Actualizar lista de paquetes y sistema
+sudo apt update && sudo apt upgrade -y
+
+# 3. Descargar el paquete .deb de Webmin desde el sitio oficial
+wget https://www.webmin.com/download/deb/webmin-current.deb
+
+# 4. Instalar dependencias necesarias
+sudo apt install -y apt-transport-https
+
+# 5. Instalar Webmin desde el archivo descargado
+sudo dpkg -i webmin-current.deb
+
+# 6. Verificar el estado del servicio Webmin
+sudo systemctl status webmin
