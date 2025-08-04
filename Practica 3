@@ -1,0 +1,92 @@
+# Instalar Ansible
+sudo apt install ansible -y
+
+# Crear carpeta de configuración de Ansible
+sudo mkdir -p /etc/ansible/
+
+# Entrar a la carpeta
+cd /etc/ansible/
+
+# Editar archivo correcto de configuración
+sudo nano ansible.cfg
+
+# Agregar dentro de ansible.cfg:
+# [defaults]
+# inventory = /etc/ansible/hosts
+# private_key_file = /home/ansible/.ssh/id_rsa
+# host_key_checking = False
+# ask_become_pass = True
+#
+# [ssh_connection]
+# ssh_args = -o ForwardAgent=yes -o ControlMaster=auto -o ControlPersist=60s
+
+# Editar archivo de inventario de hosts
+sudo nano /etc/ansible/hosts 
+
+# Agregar dentro de hosts:
+# [win]
+# 192.168.100.44
+#
+# [win:vars]
+# ansible_user=ansible
+# ansible_password=1234
+# ansible_port=5985
+# ansible_connection=winrm
+# ansible_winrm_transport=basic
+# ansible_winrm_server_cert_validation=ignore
+#
+# [linux]
+# 206.189.195.202
+#
+# [linux:vars]
+# ansible_user=ansible
+# ansible_ssh_private_key_file=~/.ssh/id_rsa
+# ansible_become_password=1234
+
+# Volver a la carpeta personal
+cd
+
+# Editar inventario de hosts otra vez (si quieres corregir algo)
+sudo nano /etc/ansible/hosts 
+
+# Crear clave SSH para autenticación
+ssh-keygen -t rsa -b 4096
+
+# Mostrar clave pública para copiarla a los hosts
+cat ~/.ssh/id_rsa.pub
+
+# Limpiar pantalla
+clear
+
+# Hacer ping con Ansible a grupo Linux usando usuario ansible
+ansible linux -m ping -u ansible
+
+# Hacer ping con Ansible a grupo Windows
+ansible win -m win_ping
+
+# En PowerShell en la máquina Windows ejecutar:
+
+# Configurar política de ejecución y habilitar remoting
+Set-ExecutionPolicy RemoteSigned -Force
+Enable-PSRemoting -Force
+
+# Configurar WSMan para permitir conexiones sin cifrar y autenticación básica
+Set-Item WSMan:\localhost\Service\AllowUnencrypted -Value $true
+Set-Item WSMan:\localhost\Service\Auth\Basic -Value $true
+Set-Item WSMan:\localhost\Client\TrustedHosts -Value '*' -Force
+
+# Configurar firewall para WinRM
+netsh advfirewall firewall add rule name="WinRM HTTP" dir=in action=allow protocol=TCP localport=5985
+netsh advfirewall firewall set rule group="Administración remota de Windows" new enable=yes
+
+# Reiniciar servicio WinRM
+Restart-Service WinRM
+
+# Crear usuario ansible y agregarlo al grupo Administradores
+$Password = ConvertTo-SecureString "1234" -AsPlainText -Force
+New-LocalUser -Name "ansible" -Password $Password -FullName "Ansible User" -Description "Usuario para Ansible"
+Add-LocalGroupMember -Group "Administrators" -Member "ansible"
+
+# Verificar configuración de WinRM
+winrm enumerate winrm/config/listener
+Test-NetConnection -ComputerName localhost -Port 5985
